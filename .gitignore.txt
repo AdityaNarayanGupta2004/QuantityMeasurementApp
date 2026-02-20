@@ -6,7 +6,6 @@
 .settings
 .project
 .classpath
-
 # IntelliJ
 .idea
 *.iml
