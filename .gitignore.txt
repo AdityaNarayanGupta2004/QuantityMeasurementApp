@@ -1,18 +1,25 @@
 
-/target/
-# Compiled files
-*.class
+# Maven wrapper
+/.mvn/wrapper/maven-wrapper.jar
 
-# Maven build folder
-target/
-
-# Eclipse files
-.metadata/
-.settings/
-bin/
-.project
+# IDE files (Eclipse)
+/.settings/
+/.project
 .classpath
 
-# IDE / OS
+# IntelliJ
+/.idea/
+*.iml
+
+# VS Code
+.vscode/
+
+# OS generated files
 .DS_Store
 Thumbs.db
+
+# Logs
+*.log
+
+# Compiled class files
+*.class
