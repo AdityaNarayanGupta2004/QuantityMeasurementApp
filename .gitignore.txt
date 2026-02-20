@@ -3,12 +3,12 @@
 /.mvn/wrapper/maven-wrapper.jar
 
 # IDE files (Eclipse)
-/.settings/
-/.project
+.settings
+.project
 .classpath
 
 # IntelliJ
-/.idea/
+.idea
 *.iml
 
 # VS Code
