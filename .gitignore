@@ -1,0 +1,15 @@
+# Eclipse IDE files
+.settings/
+.classpath
+.project
+
+# Build output
+*.class
+target/
+
+# Maven wrapper
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
