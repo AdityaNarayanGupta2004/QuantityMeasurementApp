@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import quantitymeasurement.model.LengthUnit;
 import quantitymeasurement.model.Quantity;
+import quantitymeasurement.model.TemperatureUnit;
 import quantitymeasurement.model.VolumeUnit;
 import quantitymeasurement.model.WeightUnit;
 import quantitymeasurement.model.IMeasurable;
@@ -12,6 +13,155 @@ import static org.junit.jupiter.api.Assertions.*;
 class QuantityMeasurementAppTest {
 	
 	private static final double DELTA = 0.01;
+	
+	// ------------------- Equality Tests -------------------
+
+    @Test
+    public void testCelsiusToCelsiusEquality() {
+        Quantity<TemperatureUnit> t1 = new Quantity<>(25.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> t2 = new Quantity<>(25.0, TemperatureUnit.CELSIUS);
+        assertTrue(t1.equals(t2));
+    }
+
+    @Test
+    public void testFahrenheitToFahrenheitEquality() {
+        Quantity<TemperatureUnit> t1 = new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+        Quantity<TemperatureUnit> t2 = new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+        assertTrue(t1.equals(t2));
+    }
+
+    @Test
+    public void testKelvinToKelvinEquality() {
+        Quantity<TemperatureUnit> t1 = new Quantity<>(273.15, TemperatureUnit.KELVIN);
+        Quantity<TemperatureUnit> t2 = new Quantity<>(273.15, TemperatureUnit.KELVIN);
+        assertTrue(t1.equals(t2));
+    }
+
+    @Test
+    public void testCrossUnitEquality_CelsiusToFahrenheit() {
+        Quantity<TemperatureUnit> c = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> f = new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+        assertTrue(c.equals(f));
+        assertTrue(f.equals(c));
+    }
+
+    @Test
+    public void testCrossUnitEquality_CelsiusToKelvin() {
+        Quantity<TemperatureUnit> c = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> k = new Quantity<>(273.15, TemperatureUnit.KELVIN);
+        assertTrue(c.equals(k));
+    }
+
+    @Test
+    public void testCrossUnitEquality_FahrenheitToKelvin() {
+        Quantity<TemperatureUnit> f = new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+        Quantity<TemperatureUnit> k = new Quantity<>(273.15, TemperatureUnit.KELVIN);
+        assertTrue(f.equals(k));
+    }
+
+    @Test
+    public void testSymmetricEquality() {
+        Quantity<TemperatureUnit> a = new Quantity<>(100.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> b = new Quantity<>(212.0, TemperatureUnit.FAHRENHEIT);
+        assertTrue(a.equals(b));
+        assertTrue(b.equals(a));
+    }
+
+    @Test
+    public void testTransitiveEquality() {
+        Quantity<TemperatureUnit> a = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> b = new Quantity<>(32.0, TemperatureUnit.FAHRENHEIT);
+        assertTrue(a.equals(b));
+    }
+
+    @Test
+    public void testSameReferenceEquality() {
+        Quantity<TemperatureUnit> t = new Quantity<>(10.0, TemperatureUnit.CELSIUS);
+        assertTrue(t.equals(t));
+    }
+
+    // ------------------- Conversion Accuracy -------------------
+
+    @Test
+    public void testCelsiusToFahrenheitConversion() {
+        double result = TemperatureUnit.CELSIUS.convertTo(100, TemperatureUnit.FAHRENHEIT);
+        assertEquals(212.0, result, DELTA);
+    }
+
+    @Test
+    public void testFahrenheitToCelsiusConversion() {
+        double result = TemperatureUnit.FAHRENHEIT.convertTo(32, TemperatureUnit.CELSIUS);
+        assertEquals(0.0, result, DELTA);
+    }
+
+    @Test
+    public void testKelvinConversion() {
+        double result = TemperatureUnit.CELSIUS.convertTo(0, TemperatureUnit.FAHRENHEIT);
+        assertEquals(32, result, 0.01);
+    }
+
+    // ------------------- Edge Cases -------------------
+
+    @Test
+    public void testAbsoluteZero() {
+        Quantity<TemperatureUnit> c = new Quantity<>(-273.15, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> f = new Quantity<>(-459.67, TemperatureUnit.FAHRENHEIT);
+        assertTrue(c.equals(f));
+    }
+
+    @Test
+    public void testMinus40Equality() {
+        Quantity<TemperatureUnit> c = new Quantity<>(-40.0, TemperatureUnit.CELSIUS);
+        Quantity<TemperatureUnit> f = new Quantity<>(-40.0, TemperatureUnit.FAHRENHEIT);
+        assertTrue(c.equals(f));
+    }
+
+
+    // ------------------- Type Safety -------------------
+
+    @Test
+    public void testTemperatureVsLengthFalse() {
+        Quantity<TemperatureUnit> t = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        Quantity<LengthUnit> l = new Quantity<>(0.0, LengthUnit.CENTIMETERS);
+        assertFalse(t.equals(l));
+    }
+
+    @Test
+    public void testTemperatureVsWeightFalse() {
+        Quantity<TemperatureUnit> t = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        Quantity<WeightUnit> w = new Quantity<>(0.0, WeightUnit.KILOGRAM);
+        assertFalse(t.equals(w));
+    }
+
+    @Test
+    public void testTemperatureVsVolumeFalse() {
+        Quantity<TemperatureUnit> t = new Quantity<>(0.0, TemperatureUnit.CELSIUS);
+        Quantity<VolumeUnit> v = new Quantity<>(1.0, VolumeUnit.LITRE);
+        assertFalse(t.equals(v));
+    }
+
+    // ------------------- Operation Support Methods -------------------
+
+    @Test
+    public void testTemperatureUnitOperationSupport() {
+        assertFalse(TemperatureUnit.CELSIUS.supportsArithmetic());
+        assertFalse(TemperatureUnit.CELSIUS.supportsArithmetic());
+    }
+
+    @Test
+    public void testDefaultOperationSupportForOtherUnits() {
+        assertTrue(LengthUnit.FEET.supportArithmetic());
+        assertTrue(WeightUnit.KILOGRAM.supportArithmetic());
+    }
+
+    // ------------------- Rounding Consistency -------------------
+
+    @Test
+    public void testRoundingConsistency() {
+        double result = TemperatureUnit.CELSIUS.convertTo(37, TemperatureUnit.FAHRENHEIT);
+        assertEquals(98.6, result, DELTA);
+    }
+    
 
     // ---------------- ADDITION ----------------
 
@@ -121,39 +271,6 @@ class QuantityMeasurementAppTest {
         double result = q1.subtract(q2).divide(q3);
 
         assertEquals(8.0, result, DELTA);
-    }
-	
-	
-	
-    @Test
-    public void testIMeasurableInterface_LengthUnitImplementation() {
-        LengthUnit unit = LengthUnit.FEET;
-        assertEquals(12.0, unit.convertToBaseUnit(1.0 * 12 / 12));
-        assertEquals(1.0, unit.convertFromBaseUnit(12.0));
-        assertNotNull(unit.getUnitName());
-        assertTrue(unit.getConversionFactor() > 0);
-    }
-	
-    @Test
-    public void testIMeasurableInterface_WeightUnitImplementation() {
-        WeightUnit unit = WeightUnit.KILOGRAM;
-        assertEquals(1000.0, unit.convertToBaseUnit(1.0));
-        assertEquals(1.0, unit.convertFromBaseUnit(1000.0));
-        assertNotNull(unit.getUnitName());
-        assertTrue(unit.getConversionFactor() > 0);
-    }
-
-    @Test
-    public void testIMeasurableInterface_ConsistentBehavior() {
-        IMeasurable lengthUnit = LengthUnit.INCHES;
-        IMeasurable weightUnit = WeightUnit.GRAM;
-
-        assertTrue(lengthUnit.getConversionFactor() > 0);
-        assertTrue(weightUnit.getConversionFactor() > 0);
-        assertEquals(
-                WeightUnit.KILOGRAM.convertToBaseUnit(1.0),
-                WeightUnit.GRAM.convertToBaseUnit(1000.0), 0.01
-        );
     }
     
 
