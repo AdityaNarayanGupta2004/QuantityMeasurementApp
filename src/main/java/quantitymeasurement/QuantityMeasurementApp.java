@@ -1,103 +1,111 @@
 package quantitymeasurement;
-import quantitymeasurement.model.IMeasurable;
-import quantitymeasurement.model.LengthUnit;
-import quantitymeasurement.model.Quantity;
-import quantitymeasurement.model.VolumeUnit;
-import quantitymeasurement.model.WeightUnit;
 
-public class QuantityMeasurementApp {
-	
-	// equality comparison between two quantities
-	public static <U extends IMeasurable> boolean demonstrateEquality(Quantity<U> quantity1, Quantity<U> quantity2){
-		 return quantity1.equals(quantity2);
+ import quantitymeasurement.controller.QuantityMeasurementController;
+ import quantitymeasurement.entity.QuantityDTO;
+ import quantitymeasurement.repository.IQuantityMeasurementRepository;
+ import quantitymeasurement.repository.QuantityMeasurementCacheRepository;
+ import quantitymeasurement.service.QuantityMeasurementServiceImpl;
+
+ public class QuantityMeasurementApp {
+	 // Singleton instance of QuantityMeasurementApp for application-wide access if needed
+	 private static QuantityMeasurementApp instance;
+
+	 // Maintaining a reference of the Controller this created to invoke the controller
+	 // methods for performing operations on quantities
+	 public QuantityMeasurementController controller;
+
+	 // Maintaining a reference of the Repository to report all measurements stored in
+	 // the repository at the end of the main method
+	 public IQuantityMeasurementRepository repository;
+
+	 // Private constructor to prevent instantiation from outside the class
+	 private QuantityMeasurementApp() {
+		 this.repository = QuantityMeasurementCacheRepository.getInstance();
+		 QuantityMeasurementServiceImpl service = new QuantityMeasurementServiceImpl(
+				 this.repository
+		 );
+		 this.controller = new QuantityMeasurementController(service);
 	 }
-	
-	// Conversion of quantity to target unit
-	public static <U extends IMeasurable> Quantity<U> demonstrateConversion(Quantity<U> quantity, U targetUnit){
-		 return quantity.convertTo(targetUnit);
+
+	 /**
+	  * Get the singleton instance of the QuantityMeasurementApp.
+	  *
+	  * @return the singleton instance of the application
+	  */
+	 public static QuantityMeasurementApp getInstance() {
+		 if (instance == null) {
+			 instance = new QuantityMeasurementApp();
+		 }
+		 return instance;
 	 }
-	
-	// Addition of two quantities and returning result in unit of first quantity
-	public static <U extends IMeasurable> Quantity<U> demonstrateAddition(Quantity<U> quantity1, Quantity<U> quantity2){
-		 return quantity1.add(quantity2);
+
+	 /**
+	  * The main method serves as the entry point of the application. It demonstrates the
+	  * functionality of the Quantity Measurement system by invoking the controller to perform
+	  * various operations such as comparisons, conversions, and arithmetic operations on quantities.
+	  */
+	 public static void main(String[] args) {
+		 QuantityMeasurementApp app = QuantityMeasurementApp.getInstance();
+		 QuantityMeasurementController controller = app.controller;
+
+		 System.out.println("============================================================");
+		 System.out.println("  Quantity Measurement App — UC15 (N-Tier Architecture)");
+		 System.out.println("  Package: com.apps.quantitymeasurement");
+		 System.out.println("============================================================");
+
+		 // --- Length Equality ---
+		 System.out.println("\n--- Length Equality ---");
+		 System.out.println("1 FEET == 12 INCHES : " + controller.performComparison(
+				 new QuantityDTO(1.0,  QuantityDTO.LengthUnit.FEET),
+				 new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES)));
+		 System.out.println("1 YARD  == 36 INCHES : " + controller.performComparison(
+				 new QuantityDTO(1.0,  QuantityDTO.LengthUnit.YARDS),
+				 new QuantityDTO(36.0, QuantityDTO.LengthUnit.INCHES)));
+
+		 // --- Weight Conversion & Comparison ---
+		 System.out.println("\n--- Weight Conversion & Comparison ---");
+		 QuantityDTO grams = new QuantityDTO(1000.0, QuantityDTO.WeightUnit.GRAM);
+		 QuantityDTO kg    = new QuantityDTO(1.0,    QuantityDTO.WeightUnit.KILOGRAM);
+		 System.out.println("1000 GRAM == 1 KG    : " + controller.performComparison(grams, kg));
+		 System.out.println("Convert 1000 GRAM -> KG : " + controller.performConversion(grams, kg));
+
+		 // --- Weight Addition ---
+		 System.out.println("\n--- Weight Addition ---");
+		 QuantityDTO pounds = new QuantityDTO(2.20462, QuantityDTO.WeightUnit.POUND);
+		 System.out.println("1 KG + 2.20462 LB -> KG   : " +
+				 controller.performAddition(kg, pounds));
+		 System.out.println("1 KG + 2.20462 LB -> GRAM : " +
+				 controller.performAddition(kg, pounds,
+						 new QuantityDTO(0, QuantityDTO.WeightUnit.GRAM)));
+
+		 // --- Volume Operations ---
+		 System.out.println("\n--- Volume Operations ---");
+		 QuantityDTO litre  = new QuantityDTO(1.0,    QuantityDTO.VolumeUnit.LITRE);
+		 QuantityDTO ml     = new QuantityDTO(1000.0, QuantityDTO.VolumeUnit.MILLILITRE);
+		 QuantityDTO gallon = new QuantityDTO(1.0,    QuantityDTO.VolumeUnit.GALLON);
+		 System.out.println("1 L == 1000 mL        : " + controller.performComparison(litre, ml));
+		 System.out.println("Convert 1 GAL -> L    : " + controller.performConversion(gallon, litre));
+		 System.out.println("1 L + 1000 mL         : " + controller.performAddition(litre, ml));
+
+		 // --- Temperature Conversion & Comparison ---
+		 System.out.println("\n--- Temperature Conversion & Comparison ---");
+		 QuantityDTO celsius = new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS);
+		 QuantityDTO fahr    = new QuantityDTO(212.0, QuantityDTO.TemperatureUnit.FAHRENHEIT);
+		 System.out.println("100 C == 212 F        : " + controller.performComparison(celsius, fahr));
+		 System.out.println("Convert 100 C -> F    : " +
+				 controller.performConversion(celsius,
+						 new QuantityDTO(0, QuantityDTO.TemperatureUnit.FAHRENHEIT)));
+
+		 // --- Subtraction & Division ---
+		 System.out.println("\n--- Subtraction & Division ---");
+		 QuantityDTO q1 = new QuantityDTO(2.0,  QuantityDTO.LengthUnit.FEET);
+		 QuantityDTO q2 = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES);
+		 System.out.println("2 FEET - 12 INCHES    : " + controller.performSubtraction(q1, q2));
+		 System.out.println("2 FEET / 12 INCHES    : " + controller.performDivision(q1, q2));
+
+		 System.out.println("\n============================================================");
+		 System.out.println("  Repository: " + app.repository.getAllMeasurements().size() +
+				 " operation(s) recorded.");
+		 System.out.println("============================================================");
 	 }
-	
-	//Addition of two quantities and returning result in unit of specific target unit
-	public static <U extends IMeasurable> Quantity<U> demonstrateAddition(Quantity<U> quantity1, Quantity<U> quantity2, U targetUnit){
-		 return quantity1.add(quantity2, targetUnit);
-	 }
-	
-	// Demonstrate Subtraction of two quantity and return result in the unit of the first quantity
-	public static <U extends IMeasurable> Quantity<U> demonstrateSubtraction(Quantity<U> quantity1, Quantity<U> quantity2){
-		return quantity1.subtract(quantity2);
-	}
-
-    // Demonstrate Subtraction of two quantity and return result in a specified target unit
-	public static <U extends IMeasurable> Quantity<U> demonstrateSubtraction(Quantity<U> quantity1, Quantity<U> quantity2, U targetUnit){
-		return quantity1.subtract(quantity2, targetUnit);
-	}
-	public static <U extends IMeasurable> double demonstrateDivision(Quantity<U> quantity1, Quantity<U> quantity2){
-		return quantity1.divide(quantity2);
-	}
-	
-	// main method
-	public static void main(String[] args) {
-		
-		System.out.println("----- Addition -----");
-		// Demonstration equality between the two quantities
-		Quantity<WeightUnit> weightInGrams = new Quantity<>(1000.0, WeightUnit.GRAM);
-		Quantity<WeightUnit> weightInKilograms = new Quantity<>(1.0, WeightUnit.KILOGRAM);
-		boolean areEqual = demonstrateEquality(weightInGrams, weightInKilograms);
-		System.out.println("Are weights equal? " + areEqual);
-
-		// Demonstration conversion between the two quantities
-		Quantity<WeightUnit> convertedWeight = demonstrateConversion(weightInGrams,
-		WeightUnit.KILOGRAM);
-		System.out.println("Converted Weight: " + convertedWeight.getValue() + " " +
-		convertedWeight.getUnit());
-
-		// Demonstration addition of two quantities and return the result in the unit
-		// of the first quantity
-		Quantity<WeightUnit> weightInPounds = new Quantity<>(2.20462, WeightUnit.POUND);
-		Quantity<WeightUnit> sumWeight = demonstrateAddition(weightInKilograms, weightInPounds);
-		System.out.println("Sum Weight: " + sumWeight.getValue() + " " +
-		sumWeight.getUnit());
-
-		// Demonstration addition of two quantities and return the result in a specified
-		// target unit
-		Quantity<WeightUnit> sumWeightInGrams = demonstrateAddition(weightInKilograms,
-		weightInPounds,
-		WeightUnit.GRAM);
-		System.out.println("Sum Weight in Grams: " + sumWeightInGrams.getValue() + " " +
-		sumWeightInGrams.getUnit());
-		
-		System.out.println("----- Subtraction -----");
-
-		Quantity<LengthUnit> length1 = new Quantity<>(10.0, LengthUnit.FEET);
-		Quantity<LengthUnit> length2 = new Quantity<>(6.0, LengthUnit.INCHES);
-
-		System.out.println(length1.subtract(length2)); // 9.5 FEET
-		System.out.println(length1.subtract(length2, LengthUnit.INCHES)); // 114 INCHES
-
-		System.out.println("----- Division -----");
-
-		Quantity<WeightUnit> weight1 = new Quantity<>(10.0, WeightUnit.KILOGRAM);
-		Quantity<WeightUnit> weight2 = new Quantity<>(5.0, WeightUnit.KILOGRAM);
-
-		System.out.println(weight1.divide(weight2)); // 2.0
-		
-		System.out.println("*-*-*-*-*-*-*-*-*-*-*-*-*");
-		
-		Quantity<VolumeUnit> volume1 = new Quantity<>(1.0, VolumeUnit.LITRE);
-		Quantity<VolumeUnit> volume2 = new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
-		Quantity<VolumeUnit> volume3 = new Quantity<>(1.0, VolumeUnit.GALLON);
-		
-		System.out.println(volume1.equals(volume2)); // expected true
-		System.out.println(volume1.equals(volume3)); // expected false
-		System.out.println(volume3.convertTo(VolumeUnit.LITRE)); // 3.78541L
-		System.out.println(volume1.add(volume2)); // 2 L
-		System.out.println(demonstrateConversion(volume1, VolumeUnit.MILLILITRE));
-		System.out.println(demonstrateAddition(volume1, volume3, VolumeUnit.LITRE));
-	}
-}
-
+ }

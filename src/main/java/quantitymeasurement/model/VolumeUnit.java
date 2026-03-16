@@ -1,35 +1,42 @@
 package quantitymeasurement.model;
 
-public enum VolumeUnit implements IMeasurable{
-	
-	LITRE(1.0), // base Unit
-	MILLILITRE(0.001), // 1l = 1000ml
-	GALLON(3.78541); // 1L = 3.78541 gallon
-	
-	private final double conversionFactor;
+import quantitymeasurement.model.IMeasurable;
 
-	VolumeUnit(double conversionFactor) {
-		this.conversionFactor = conversionFactor;
-	}
-	
-	 @Override
-	public double getConversionFactor() {
-        return conversionFactor;
+public enum VolumeUnit implements IMeasurable {
+    LITRE(1.0), // base unit
+    MILLILITRE(0.001), // 1L = 1000ml
+    GALLON(3.78541); // 1L = 3.78541 gallon
+
+    private final double conversionValue;
+
+    VolumeUnit(double conversionValue){
+        this.conversionValue = conversionValue;
     }
-	
-	// converting to base unit litre
-	 @Override
-	public double convertToBaseUnit(double value) {
-        return value * conversionFactor;
-    }
-    
-	 @Override
-    public double convertFromBaseUnit(double baseValue) {
-    	return baseValue/conversionFactor;
-    }
-    
+
     @Override
-    public String getUnitName() {
-    	return this.name();
+    public double getConversionValue() {return conversionValue;}
+
+    @Override
+    public double convertToBaseUnit(double value) {return value*conversionValue;}
+
+    @Override
+    public double convertFromBaseUnit(double baseValue) {return baseValue/conversionValue;}
+
+    @Override
+    public String getUnitName() {return this.name();}
+
+    @Override
+    public String getMeasurementType(){
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public IMeasurable getUnitInstance(String unitName){
+        for(VolumeUnit unit : VolumeUnit.values()){
+            if(unit.getUnitName().equalsIgnoreCase(unitName)){
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Invalid volume unit: " + unitName);
     }
 }

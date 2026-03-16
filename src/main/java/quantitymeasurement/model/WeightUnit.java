@@ -1,38 +1,49 @@
 package quantitymeasurement.model;
 
-public enum WeightUnit implements IMeasurable {
+import quantitymeasurement.model.IMeasurable;
 
-	MILLIGRAM(0.001),
-	GRAM(1.0),
-	KILOGRAM(1000.0),
-	POUND(453.592),
-	TONNE(1000000.0);
-	
-	private final double conversionFactor;
-	
-	WeightUnit(double conversionFactor){
-		this.conversionFactor = conversionFactor;
-	}
-	
-	@Override
-	public double getConversionFactor() {
-        return conversionFactor;
+public enum WeightUnit implements IMeasurable {
+    // Conversion factor to the base unit (grams)
+    MILLIGRAM(0.001),
+    GRAM(1.0),
+    KILOGRAM(1000.0),
+    POUND(453.592),
+    TONNE(1000000.0);
+
+    private final double conversionValue;
+
+    WeightUnit(double conversionValue){
+        this.conversionValue = conversionValue;
     }
-	
-	// converting to base unit gram
-	@Override
-	public double convertToBaseUnit(double value) {
-        return value * conversionFactor;
-    }
-    
-	@Override
-    public double convertFromBaseUnit(double baseValue) {
-    	return Math.round((baseValue/conversionFactor)*100.0)/100.0;
-    }
-    
+
+    // Get convertion factor to the base unit
     @Override
-    public String getUnitName() {
-    	return this.name();
+    public double getConversionValue(){return conversionValue;}
+
+    // Convert value from this unit to base unit (gram)
+    @Override
+    public double convertToBaseUnit(double value){return value * this.conversionValue;}
+
+    // Convert value from base unit (gram) to this unit
+    @Override
+    public double convertFromBaseUnit(double baseValue){return baseValue/conversionValue;}
+
+    // Get Unit name
+    @Override
+    public String getUnitName(){return this.name();}
+
+    @Override
+    public String getMeasurementType(){
+        return this.getClass().getSimpleName();
     }
-	
+
+    @Override
+    public IMeasurable getUnitInstance(String unitName){
+        for(WeightUnit unit : WeightUnit.values()){
+            if(unit.getUnitName().equalsIgnoreCase(unitName)){
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Invalid weight unit:" + unitName);
+    }
 }

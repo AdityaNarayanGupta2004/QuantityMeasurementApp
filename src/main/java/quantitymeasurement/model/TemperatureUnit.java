@@ -2,13 +2,15 @@ package quantitymeasurement.model;
 
 import java.util.function.Function;
 
-public enum TemperatureUnit implements IMeasurable{
-	
-	CELSIUS(false),
+public enum TemperatureUnit implements IMeasurable {
+
+
+    CELSIUS(false),
     FAHRENHEIT(true),
     KELVIN(false);
 
-	// Fahrenheit to Celsius conversion
+
+    // Fahrenheit to Celsius conversion
     final Function<Double, Double> FAHRENHEIT_TO_CELSIUS = (fahrenheit) -> (fahrenheit - 32)*5/9;
 
     // Celsius to Celsius conversion
@@ -22,8 +24,8 @@ public enum TemperatureUnit implements IMeasurable{
 
     // Lambda function: temperature does not support arithmetic
     SupportsArithmetic supportsArithmetic = ()->false;
-    
- // Constructor
+
+    // Constructor
     TemperatureUnit(boolean isFahrenheit){
         if (this.name().equals("FAHRENHEIT")) {
             this.conversionValue = FAHRENHEIT_TO_CELSIUS;
@@ -33,38 +35,51 @@ public enum TemperatureUnit implements IMeasurable{
             this.conversionValue = CELSIUS_TO_CELSIUS;
         }
     }
-    
-	@Override
-	public double getConversionFactor() {
-		// TODO Auto-generated method stub
-		return 1;
-	}
 
-	@Override
-	public double convertToBaseUnit(double value) {
-		// TODO Auto-generated method stub
-		return conversionValue.apply(value);
-	}
 
-	@Override
-	public double convertFromBaseUnit(double baseValue) {
-		switch (this) {
-        case FAHRENHEIT:
-            return (baseValue * 9 / 5) + 32;
-        case KELVIN:
-            return baseValue + 273.15;
-        default:
-            return baseValue; // CELSIUS
-		}
-	}
+    @Override
+    public double getConversionValue() {
+        return 1;
+    }
 
-	@Override
-	public String getUnitName() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	// Convert between temperature units
+    @Override
+    public double convertToBaseUnit(double value) {
+        return conversionValue.apply(value);
+    }
+
+    @Override
+    public double convertFromBaseUnit(double baseValue) {
+        switch (this) {
+            case FAHRENHEIT:
+                return (baseValue * 9 / 5) + 32;
+            case KELVIN:
+                return baseValue + 273.15;
+            default:
+                return baseValue; // CELSIUS
+        }
+    }
+
+    @Override
+    public String getUnitName() {
+        return this.name();
+    }
+
+    @Override
+    public String getMeasurementType(){
+        return this.getClass().getSimpleName();
+    }
+
+    @Override
+    public IMeasurable getUnitInstance(String unitName){
+        for(TemperatureUnit unit : TemperatureUnit.values()){
+            if(unit.getUnitName().equalsIgnoreCase(unitName)){
+                return unit;
+            }
+        }
+        throw new IllegalArgumentException("Invalid temperature unit:" + unitName);
+    }
+
+    // Convert between temperature units
     public double convertTo(double value, TemperatureUnit targetUnit) {
         double baseValue = this.convertToBaseUnit(value);
         return targetUnit.convertFromBaseUnit(baseValue);
@@ -102,5 +117,4 @@ public enum TemperatureUnit implements IMeasurable{
         System.out.println("32F to C = " +
                 TemperatureUnit.FAHRENHEIT.convertTo(32, TemperatureUnit.CELSIUS));
     }
-	
 }
