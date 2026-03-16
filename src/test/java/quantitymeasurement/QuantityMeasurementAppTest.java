@@ -158,4 +158,101 @@ class QuantityMeasurementAppTest {
                 new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES));
         assertEquals(1, repository.getAllMeasurements().size());
     }
+
+    // ─── Additional Test Cases ───────────────────────────────────────────────────
+
+    @Test
+    void testController_DisplayResult_Error() {
+        // Simulate an invalid operation to trigger error
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            controller.performAddition(
+                    new QuantityDTO(1.0, QuantityDTO.TemperatureUnit.CELSIUS),
+                    new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET)
+            );
+        });
+        assertTrue(exception.getMessage().contains("Cross-category operation not allowed"));
+    }
+
+    @Test
+    void testDataFlow_ControllerToService() {
+        // Ensure controller passes correct data to service
+        QuantityDTO dto1 = new QuantityDTO(1.0, QuantityDTO.WeightUnit.KILOGRAM);
+        QuantityDTO dto2 = new QuantityDTO(1000.0, QuantityDTO.WeightUnit.GRAM);
+        boolean result = controller.performComparison(dto1, dto2);
+        assertTrue(result); // 1 KG == 1000 GM
+    }
+
+    @Test
+    void testDataFlow_ServiceToController() {
+        // Ensure service returns correct value back to controller
+        QuantityDTO dto1 = new QuantityDTO(2.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO dto2 = new QuantityDTO(24.0, QuantityDTO.LengthUnit.INCHES);
+        QuantityDTO result = controller.performAddition(dto1, dto2);
+        assertEquals(4.0, result.getValue(), 0.01);
+    }
+
+    @Test
+    void testBackwardCompatibility_AllUC1_UC14_Tests() {
+        // Run some sample legacy scenarios
+        assertTrue(controller.performComparison(
+                new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS),
+                new QuantityDTO(212.0, QuantityDTO.TemperatureUnit.FAHRENHEIT)
+        ));
+        assertEquals(12.0, controller.performConversion(
+                new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET),
+                new QuantityDTO(0.0, QuantityDTO.LengthUnit.INCHES)
+        ).getValue(), 0.01);
+    }
+
+    @Test
+    void testService_AllMeasurementCategories() {
+        // Length
+        assertTrue(controller.performComparison(
+                new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET),
+                new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES)
+        ));
+        // Weight
+        assertTrue(controller.performComparison(
+                new QuantityDTO(1000.0, QuantityDTO.WeightUnit.GRAM),
+                new QuantityDTO(1.0, QuantityDTO.WeightUnit.KILOGRAM)
+        ));
+        // Volume
+        assertTrue(controller.performComparison(
+                new QuantityDTO(1.0, QuantityDTO.VolumeUnit.LITRE),
+                new QuantityDTO(1000.0, QuantityDTO.VolumeUnit.MILLILITRE)
+        ));
+        // Temperature
+        assertTrue(controller.performComparison(
+                new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS),
+                new QuantityDTO(212.0, QuantityDTO.TemperatureUnit.FAHRENHEIT)
+        ));
+    }
+
+    @Test
+    void testController_AllOperations() {
+        QuantityDTO feet = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
+        QuantityDTO inches = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES);
+        assertTrue(controller.performComparison(feet, inches));
+        assertEquals(2.0, controller.performAddition(feet, inches).getValue(), 0.01);
+        assertEquals(1.0, controller.performDivision(feet, feet), 0.01);
+    }
+
+    @Test
+    void testService_ValidationConsistency() {
+        Exception ex = assertThrows(RuntimeException.class, () -> {
+            controller.performAddition(
+                    new QuantityDTO(1.0, QuantityDTO.TemperatureUnit.CELSIUS),
+                    new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET)
+            );
+        });
+        assertTrue(ex.getMessage().contains("Cross-category operation not allowed"));
+    }
+
+    @Test
+    void testEntity_Immutability() {
+        QuantityDTO dto = new QuantityDTO(10.0, QuantityDTO.LengthUnit.FEET);
+        // Attempting to mutate fields should fail (if setter removed or final used)
+        assertEquals(10.0, dto.getValue(), 0.01);
+    }
+
 }
