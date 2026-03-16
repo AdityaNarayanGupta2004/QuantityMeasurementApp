@@ -35,8 +35,6 @@ public enum TemperatureUnit implements IMeasurable {
             this.conversionValue = CELSIUS_TO_CELSIUS;
         }
     }
-
-
     @Override
     public double getConversionValue() {
         return 1;
@@ -103,18 +101,16 @@ public enum TemperatureUnit implements IMeasurable {
     public String toString() {
         return this.name();
     }
-
+    // main method
     public static void main(String[] args) {
         System.out.println("TemperatureUnit Enum");
-
         for (TemperatureUnit unit : TemperatureUnit.values()) {
             System.out.println(unit + " supports arithmetic: " + unit.supportsArithmetic());
         }
 
-        System.out.println("0C to F = " +
-                TemperatureUnit.CELSIUS.convertTo(0, TemperatureUnit.FAHRENHEIT));
-
         System.out.println("32F to C = " +
                 TemperatureUnit.FAHRENHEIT.convertTo(32, TemperatureUnit.CELSIUS));
+        System.out.println("0C to F = " +
+                TemperatureUnit.CELSIUS.convertTo(0, TemperatureUnit.FAHRENHEIT));
     }
 }

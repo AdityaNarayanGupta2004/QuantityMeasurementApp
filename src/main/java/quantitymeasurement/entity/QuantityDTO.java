@@ -1,12 +1,11 @@
 package quantitymeasurement.entity;
 
-
 interface IMeasurableUnit{
     String getUnitName();
     String getMeasurementType();
 }
-public class QuantityDTO {
 
+public class QuantityDTO {
     public enum LengthUnit implements IMeasurableUnit{
         FEET, INCHES, YARDS, CENTIMETERS;
 
@@ -68,27 +67,33 @@ public class QuantityDTO {
     public String measurementType;
 
     public QuantityDTO(double value, IMeasurableUnit unit) {
-        this.value           = value;
-        this.unit            = unit.getUnitName();
+        this.value = value;
+        this.unit = unit.getUnitName();
         this.measurementType = unit.getMeasurementType();
     }
 
     public QuantityDTO(double value, String unit, String measurementType) {
-        this.value           = value;
-        this.unit            = unit;
+        this.value = value;
+        this.unit= unit;
         this.measurementType = measurementType;
     }
 
-    public double getValue() {return value;}
-
-    public String getUnit() {return unit;}
-
-    public String getMeasurementType() {return measurementType;}
+    public double getValue() {
+        return value;
+    }
+    public String getUnit() {
+        return unit;
+    }
+    public String getMeasurementType() {
+        return measurementType;
+    }
 
     @Override
-    public String toString() {return String.format("%.2f %s", value, unit);}
+    public String toString() {
+        return String.format("%.2f %s", value, unit);
+    }
 
-    // Main method for testing purposes
+    // Main method
     public static void main(String[] args) {
         QuantityDTO dto1 = new QuantityDTO(2.0,  LengthUnit.FEET);
         QuantityDTO dto2 = new QuantityDTO(24.0, LengthUnit.INCHES);

@@ -13,7 +13,6 @@ public class QuantityMeasurementEntity implements Serializable {
     public double thatValue;
     public String thatUnit;
     public String thatMeasurementType;
-    // e.g., "COMPARE", "CONVER", "ADD", "SUBTRACT", "DEVIDE"
     public String operation;
     public double resultValue;
     public String resultUnit;
@@ -31,12 +30,11 @@ public class QuantityMeasurementEntity implements Serializable {
         this.resultString = result;
     }
 
-    public QuantityMeasurementEntity(QuantityModel<IMeasurable> thisQuantity,
-            QuantityModel<IMeasurable> thatQuantity,
+    public QuantityMeasurementEntity(QuantityModel<IMeasurable> thisQuantity, QuantityModel<IMeasurable> thatQuantity,
             String operation, QuantityModel<IMeasurable> result) {
         this(thisQuantity, thatQuantity, operation);
-        this.resultValue           = result.getValue();
-        this.resultUnit            = result.getUnit().getUnitName();
+        this.resultValue = result.getValue();
+        this.resultUnit= result.getUnit().getUnitName();
         this.resultMeasurementType = result.getUnit().getMeasurementType();
     }
 
@@ -52,20 +50,19 @@ public class QuantityMeasurementEntity implements Serializable {
             String operation, String errorMessage, boolean isError) {
         this(thisQuantity, thatQuantity, operation);
         this.errorMessage = errorMessage;
-        this.isError      = isError;
+        this.isError= isError;
     }
 
     public QuantityMeasurementEntity(QuantityModel<IMeasurable> thisQuantity,
-            QuantityModel<IMeasurable> thatQuantity,
-            String operation) {
+            QuantityModel<IMeasurable> thatQuantity,String operation) {
         if (thisQuantity != null && thisQuantity.getUnit() != null) {
-            this.thisValue           = thisQuantity.getValue();
-            this.thisUnit            = thisQuantity.getUnit().getUnitName();
+            this.thisValue = thisQuantity.getValue();
+            this.thisUnit= thisQuantity.getUnit().getUnitName();
             this.thisMeasurementType = thisQuantity.getUnit().getMeasurementType();
         }
         if (thatQuantity != null && thatQuantity.getUnit() != null) {
-            this.thatValue           = thatQuantity.getValue();
-            this.thatUnit            = thatQuantity.getUnit().getUnitName();
+            this.thatValue= thatQuantity.getValue();
+            this.thatUnit= thatQuantity.getUnit().getUnitName();
             this.thatMeasurementType = thatQuantity.getUnit().getMeasurementType();
         }
         this.operation = operation;
@@ -78,12 +75,12 @@ public class QuantityMeasurementEntity implements Serializable {
         QuantityMeasurementEntity other = (QuantityMeasurementEntity) obj;
         return Double.compare(thisValue, other.thisValue) == 0
                 && Double.compare(thatValue, other.thatValue) == 0
-                && java.util.Objects.equals(thisUnit,            other.thisUnit)
-                && java.util.Objects.equals(thatUnit,            other.thatUnit)
+                && java.util.Objects.equals(thisUnit,other.thisUnit)
+                && java.util.Objects.equals(thatUnit,other.thatUnit)
                 && java.util.Objects.equals(thisMeasurementType, other.thisMeasurementType)
                 && java.util.Objects.equals(thatMeasurementType, other.thatMeasurementType)
-                && java.util.Objects.equals(operation,           other.operation)
-                && java.util.Objects.equals(resultString,        other.resultString)
+                && java.util.Objects.equals(operation, other.operation)
+                && java.util.Objects.equals(resultString,other.resultString)
                 && Double.compare(resultValue, other.resultValue) == 0
                 && isError == other.isError
                 && java.util.Objects.equals(errorMessage, other.errorMessage);
@@ -105,6 +102,6 @@ public class QuantityMeasurementEntity implements Serializable {
 
     // Main method for testing purposes
     public static void main(String[] args) {
-        System.out.println("QuantityMeasurementEntity test");
+        System.out.println("QuantityMeasurementEntity testing");
     }
 }

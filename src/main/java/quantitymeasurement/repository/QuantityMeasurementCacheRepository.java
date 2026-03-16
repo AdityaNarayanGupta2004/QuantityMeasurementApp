@@ -6,9 +6,9 @@ import java.io.*;
 import java.util.List;
 
 class AppendableObjectOutputStream extends ObjectOutputStream {
-    public AppendableObjectOutputStream(OutputStream out) throws IOException
+    public AppendableObjectOutputStream(OutputStream output) throws IOException
     {
-        super(out);
+        super(output);
     }
 
     @Override
@@ -19,7 +19,7 @@ class AppendableObjectOutputStream extends ObjectOutputStream {
         if (!file.exists() || file.length() == 0) {
             super.writeStreamHeader();
         } else {
-            reset(); // Just reset instead of writing header
+            reset(); // Just reseting  instead of writing header
         }
     }
 }
@@ -64,7 +64,7 @@ public class QuantityMeasurementCacheRepository implements IQuantityMeasurementR
     }
 
     private void saveToDisk(QuantityMeasurementEntity entity) {
-        // Append the new entity to the existing file without overwriting previous data
+        // Appending the new entity to the existing file without overwriting previous data
         try (
                 FileOutputStream fos = new FileOutputStream(FILE_NAME, true);
                 AppendableObjectOutputStream oos = new AppendableObjectOutputStream(fos)
@@ -75,22 +75,19 @@ public class QuantityMeasurementCacheRepository implements IQuantityMeasurementR
         }
     }
 
-    // Method to load the in-memory cache from disk when the repository is initialized
+    // this is the Method to load the in-memory cache from disk when the repository is initialized
     private void loadFromDisk() {
         File file = new File(FILE_NAME);
         if (!file.exists()) {
             return;
         }
-        try (
-                FileInputStream fis = new FileInputStream(FILE_NAME);
-                ObjectInputStream ois = new ObjectInputStream(fis)
-        ) {
-            while (true) {
-                try {
+        try(FileInputStream fis = new FileInputStream(FILE_NAME);
+                ObjectInputStream ois = new ObjectInputStream(fis)) {
+            while(true) {
+                try{
                     QuantityMeasurementEntity entity = (QuantityMeasurementEntity) ois.readObject();
                     quantityMeasurementEntityCache.add(entity);
                 } catch (EOFException e) {
-                    // End of file reached
                     break;
                 }
             }

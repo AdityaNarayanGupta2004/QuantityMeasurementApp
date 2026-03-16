@@ -1,11 +1,9 @@
 package quantitymeasurement.core;
-
 import quantitymeasurement.model.IMeasurable;
 
 public class Quantity<U extends IMeasurable> {
     private double value;
     private U unit;
-
     public Quantity(double value, U unit){
         if (!Double.isFinite(value)) {
             throw new IllegalArgumentException("Value must be finite");
@@ -16,10 +14,13 @@ public class Quantity<U extends IMeasurable> {
         this.value = value;
         this.unit = unit;
     }
+    public double getValue(){
+        return value;
+    }
 
-    public double getValue(){return value;}
-
-    public U getUnit(){return unit;}
+    public U getUnit(){
+        return unit;
+    }
 
     // Convert this unit to the specific target unit
     public Quantity<U> convertTo(U targetUnit){
@@ -29,7 +30,6 @@ public class Quantity<U extends IMeasurable> {
         if(!targetUnit.getClass().equals(unit.getClass())){
             throw new IllegalArgumentException("Target unit should belong to same class");
         }
-
         double baseValue = unit.convertToBaseUnit(value);
         double convertValue = targetUnit.convertFromBaseUnit(baseValue);
 
@@ -39,14 +39,17 @@ public class Quantity<U extends IMeasurable> {
     // Compares this quantity with other object for equality.
     @Override
     public boolean equals(Object o){
-        if(o == this){return true;}
-        if(o == null || o.getClass() != this.getClass()){return false;}
-
+        if(o == this){
+            return true;
+        }
+        if(o == null || o.getClass() != this.getClass()){
+            return false;
+        }
         Quantity<?> other = (Quantity<?>) o;
-        if(!this.unit.getClass().equals(other.unit.getClass())){return false;}
-
+        if(!this.unit.getClass().equals(other.unit.getClass())) {
+            return false;
+        }
         return Double.compare(unit.convertToBaseUnit(value), other.unit.convertToBaseUnit(other.value))==0;
-
     }
 
     // Arithmetic enum
@@ -86,7 +89,9 @@ public class Quantity<U extends IMeasurable> {
     }
 
     // Subtracts this quantity from another quantity of the same unit type and return the result in the unit of this quantity
-    public Quantity<U> subtract(Quantity<U> other){return subtract(other, unit);}
+    public Quantity<U> subtract(Quantity<U> other){
+        return subtract(other, unit);
+    }
 
     // Subtracts this quantity from another quantity of the same unit type and return the result in the specified target unit
     public Quantity<U> subtract(Quantity<U> other, U targetUnit){
@@ -102,7 +107,6 @@ public class Quantity<U extends IMeasurable> {
     // Centralized core logic
     private double performBaseArithmetic(Quantity<U> other, U targetUnit, ArithmeticOperation operation, boolean targetUnitRequired){
         validateArithmeticOperands(other, targetUnit, targetUnitRequired);
-
         double thisBase = unit.convertToBaseUnit(value);
         double otherBase = other.unit.convertToBaseUnit(other.value);
 
@@ -133,18 +137,20 @@ public class Quantity<U extends IMeasurable> {
             }
         }
     }
-
     // Helper Builder
     private Quantity<U> buildQuantityFromBase(double baseValue, U targetUnit){
         double convertedValue = targetUnit.convertFromBaseUnit(baseValue);
         return new Quantity<>(round(convertedValue), targetUnit);
     }
-
     // Round the value to two decimal value
-    private double round(double value){return (double) Math.round(value*100)/100;}
+    private double round(double value){
+        return (double) Math.round(value*100)/100;
+    }
 
     // Override toString method
     @Override
-    public String toString(){return String.format("%.2f %s", value, unit);}
+    public String toString(){
+        return String.format("%.2f %s", value, unit);
+    }
 
 }

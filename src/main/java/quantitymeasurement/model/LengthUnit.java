@@ -31,11 +31,15 @@ public enum LengthUnit implements IMeasurable {
 
     // Convert value from base unit (inch) to this unit
     @Override
-    public double convertFromBaseUnit(double baseValue){return baseValue/conversionFactor;}
+    public double convertFromBaseUnit(double baseValue){
+        return baseValue/conversionFactor;
+    }
 
     // Get unit name
     @Override
-    public String getUnitName() {return this.name();}
+    public String getUnitName() {
+        return this.name();
+    }
 
     @Override
     public String getMeasurementType(){

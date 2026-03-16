@@ -8,22 +8,29 @@ public enum VolumeUnit implements IMeasurable {
     GALLON(3.78541); // 1L = 3.78541 gallon
 
     private final double conversionValue;
-
     VolumeUnit(double conversionValue){
         this.conversionValue = conversionValue;
     }
 
     @Override
-    public double getConversionValue() {return conversionValue;}
+    public double getConversionValue() {
+        return conversionValue;
+    }
 
     @Override
-    public double convertToBaseUnit(double value) {return value*conversionValue;}
+    public double convertToBaseUnit(double value) {
+        return value*conversionValue;
+    }
 
     @Override
-    public double convertFromBaseUnit(double baseValue) {return baseValue/conversionValue;}
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue/conversionValue;
+    }
 
     @Override
-    public String getUnitName() {return this.name();}
+    public String getUnitName() {
+        return this.name();
+    }
 
     @Override
     public String getMeasurementType(){

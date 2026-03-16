@@ -17,9 +17,4 @@ public interface IQuantityMeasurementService {
     QuantityDTO subtract(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO, QuantityDTO targetUnitDTO);
 
     double divide(QuantityDTO thisQuantityDTO, QuantityDTO thatQuantityDTO);
-
-    // Main method for testing purposes
-    public static void main(String[] args) {
-        System.out.println("IQuantityMeasurementService Interface");
-    }
 }
