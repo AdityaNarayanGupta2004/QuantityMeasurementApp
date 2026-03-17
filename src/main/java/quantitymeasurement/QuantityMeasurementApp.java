@@ -4,31 +4,45 @@ import quantitymeasurement.controller.QuantityMeasurementController;
 import quantitymeasurement.entity.QuantityDTO;
 import quantitymeasurement.repository.IQuantityMeasurementRepository;
 import quantitymeasurement.repository.QuantityMeasurementCacheRepository;
+import quantitymeasurement.repository.QuantityMeasurementDatabaseRepository;
 import quantitymeasurement.service.QuantityMeasurementServiceImpl;
+import quantitymeasurement.utility.ApplicationConfig;
+import org.h2.tools.Server; // H2 TCP server
+import java.sql.SQLException;
+
+import java.util.logging.Logger;
 
 public class QuantityMeasurementApp {
 
-	// Singleton instance
+	private static final Logger logger = Logger.getLogger(
+			QuantityMeasurementApp.class.getName());
+
 	private static QuantityMeasurementApp instance;
 
-	// Controller reference
 	public QuantityMeasurementController controller;
-
-	// Repository reference
 	public IQuantityMeasurementRepository repository;
 
-	// Private constructor
 	private QuantityMeasurementApp() {
+		ApplicationConfig config = ApplicationConfig.getInstance();
+		String repoType = config.getProperty(
+				ApplicationConfig.ConfigKey.REPOSITORY_TYPE.getKey(), "database");
 
-		repository = QuantityMeasurementCacheRepository.getInstance();
+		logger.info("Initializing QuantityMeasurementApp with repository type: " + repoType);
+
+		if ("database".equalsIgnoreCase(repoType)) {
+			this.repository = QuantityMeasurementDatabaseRepository.getInstance();
+			logger.info("Using Database Repository (JDBC/H2)");
+		} else {
+			this.repository = QuantityMeasurementCacheRepository.getInstance();
+			logger.info("Using Cache Repository (in-memory)");
+		}
 
 		QuantityMeasurementServiceImpl service =
-				new QuantityMeasurementServiceImpl(repository);
-
-		controller = new QuantityMeasurementController(service);
+				new QuantityMeasurementServiceImpl(this.repository);
+		this.controller = new QuantityMeasurementController(service);
+		logger.info("QuantityMeasurementApp initialized successfully.");
 	}
 
-	// Get singleton instance
 	public static QuantityMeasurementApp getInstance() {
 		if (instance == null) {
 			instance = new QuantityMeasurementApp();
@@ -36,98 +50,95 @@ public class QuantityMeasurementApp {
 		return instance;
 	}
 
-	// Main method
-	public static void main(String[] args) {
+	/** Close resources held by the repository when shutting down. */
+	public void closeResources() {
+		repository.releaseResources();
+		instance = null;
+		logger.info("QuantityMeasurementApp resources closed.");
+	}
 
-		QuantityMeasurementApp app = QuantityMeasurementApp.getInstance();
-		QuantityMeasurementController controller = app.controller;
-
-		System.out.println("---------------------------------------------");
-		System.out.println("Quantity Measurement App (N-Tier Architecture)");
-		System.out.println("---------------------------------------------");
-
-		// Length Equality
-		System.out.println("\n--- Length Equality ---");
-
-		QuantityDTO feet = new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET);
-		QuantityDTO inches12 = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES);
-		System.out.println("1 FEET == 12 INCHES : " + controller.performComparison(feet, inches12));
-
-		QuantityDTO yard = new QuantityDTO(1.0, QuantityDTO.LengthUnit.YARDS);
-		QuantityDTO inches36 = new QuantityDTO(36.0, QuantityDTO.LengthUnit.INCHES);
-		System.out.println("1 YARD == 36 INCHES : " + controller.performComparison(yard, inches36));
+	/** Delete all measurements - useful for testing or resetting state. */
+	public void deleteAllMeasurements() {
+		repository.deleteAll();
+		logger.info("All measurements deleted.");
+	}
 
 
-		// Weight Conversion & Comparison
-		System.out.println("\n-*-*- Weight Conversion & Comparison -*-*-");
 
-		QuantityDTO grams = new QuantityDTO(1000.0, QuantityDTO.WeightUnit.GRAM);
-		QuantityDTO kg = new QuantityDTO(1.0, QuantityDTO.WeightUnit.KILOGRAM);
-
-		System.out.println("1000 GRAM == 1 KG : " + controller.performComparison(grams, kg));
-		System.out.println("Convert 1000 GRAM -> KG : " + controller.performConversion(grams, kg));
-
-
-		// Weight Addition
-		System.out.println("\n--- Weight Addition ---");
-
-		QuantityDTO pounds = new QuantityDTO(2.20462, QuantityDTO.WeightUnit.POUND);
-
-		System.out.println("1 KG + 2.20462 LB -> KG : " +
-				controller.performAddition(kg, pounds));
-
-		System.out.println("1 KG + 2.20462 LB -> GRAM : " +
-				controller.performAddition(
-						kg,
-						pounds,
-						new QuantityDTO(0, QuantityDTO.WeightUnit.GRAM)
-				));
+	public static void startH2Server() {
+		try {
+			Server tcpServer = Server.createTcpServer(
+					"-tcpPort", "9092",
+					"-tcpAllowOthers",
+					"-ifNotExists").start();
+			logger.info("H2 TCP server started at: " + tcpServer.getURL());
+		} catch (SQLException e) {
+			logger.warning("Failed to start H2 TCP server: " + e.getMessage());
+		}
+	}
 
 
-		// Volume Operations
-		System.out.println("\n--- Volume Operations ---");
+	public static void main(String[] args) throws SQLException {
+		// Start H2 console before any operations
+		startH2Server();
 
-		QuantityDTO litre = new QuantityDTO(1.0, QuantityDTO.VolumeUnit.LITRE);
-		QuantityDTO ml = new QuantityDTO(1000.0, QuantityDTO.VolumeUnit.MILLILITRE);
-		QuantityDTO gallon = new QuantityDTO(1.0, QuantityDTO.VolumeUnit.GALLON);
+		QuantityMeasurementApp app        = QuantityMeasurementApp.getInstance();
+		QuantityMeasurementController ctrl = app.controller;
 
-		System.out.println("1 L == 1000 mL : " + controller.performComparison(litre, ml));
-		System.out.println("Convert 1 GAL -> L : " + controller.performConversion(gallon, litre));
-		System.out.println("1 L + 1000 mL : " + controller.performAddition(litre, ml));
+		logger.info("============================================================");
+		logger.info("  Quantity Measurement App - UC16 (JDBC Database Integration)");
+		logger.info("  Repository: " + app.repository.getClass().getSimpleName());
+		logger.info("  Pool Stats: " + app.repository.getPoolStatistics());
+		logger.info("============================================================");
 
+		// --- Length Equality ---
+		logger.info("1 FEET == 12 INCHES : " + ctrl.performComparison(
+				new QuantityDTO(1.0,  QuantityDTO.LengthUnit.FEET),
+				new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES)));
 
-		// Temperature Conversion
-		System.out.println("\n--- Temperature Conversion & Comparison ---");
+		logger.info("1 YARD == 36 INCHES : " + ctrl.performComparison(
+				new QuantityDTO(1.0,  QuantityDTO.LengthUnit.YARDS),
+				new QuantityDTO(36.0, QuantityDTO.LengthUnit.INCHES)));
 
-		QuantityDTO celsius = new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS);
-		QuantityDTO fahr = new QuantityDTO(212.0, QuantityDTO.TemperatureUnit.FAHRENHEIT);
+		// --- Weight ---
+		QuantityDTO grams  = new QuantityDTO(1000.0, QuantityDTO.WeightUnit.GRAM);
+		QuantityDTO kg     = new QuantityDTO(1.0,    QuantityDTO.WeightUnit.KILOGRAM);
+		logger.info("1000 GRAM == 1 KG   : " + ctrl.performComparison(grams, kg));
+		logger.info("Convert 1000g -> KG : " + ctrl.performConversion(grams, kg));
+		logger.info("1000g + 1kg -> KG   : " + ctrl.performAddition(grams, kg));
 
-		System.out.println("100 C == 212 F : " + controller.performComparison(celsius, fahr));
+		// --- Volume ---
+		logger.info("1 L == 1000 mL      : " + ctrl.performComparison(
+				new QuantityDTO(1.0,    QuantityDTO.VolumeUnit.LITRE),
+				new QuantityDTO(1000.0, QuantityDTO.VolumeUnit.MILLILITRE)));
 
-		System.out.println("Convert 100 C -> F : " +
-				controller.performConversion(
-						celsius,
-						new QuantityDTO(0, QuantityDTO.TemperatureUnit.FAHRENHEIT)
-				));
+		// --- Temperature ---
+		logger.info("100C == 212F        : " + ctrl.performComparison(
+				new QuantityDTO(100.0, QuantityDTO.TemperatureUnit.CELSIUS),
+				new QuantityDTO(212.0, QuantityDTO.TemperatureUnit.FAHRENHEIT)));
 
-
-		// Subtraction & Division
-		System.out.println("\n--- Subtraction & Division ---");
-
-		QuantityDTO q1 = new QuantityDTO(2.0, QuantityDTO.LengthUnit.FEET);
+		// --- Arithmetic ---
+		QuantityDTO q1 = new QuantityDTO(2.0,  QuantityDTO.LengthUnit.FEET);
 		QuantityDTO q2 = new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES);
+		logger.info("2 FEET - 12 INCHES  : " + ctrl.performSubtraction(q1, q2));
+		logger.info("2 FEET / 12 INCHES  : " + ctrl.performDivision(q1, q2));
 
-		System.out.println("2 FEET - 12 INCHES : " +
-				controller.performSubtraction(q1, q2));
+		// --- Repository stats ---
+		logger.info("------------------------------------------------------------");
+		logger.info("Total measurements stored: " + app.repository.getTotalCount());
+		logger.info("COMPARE operations: " +
+				app.repository.getMeasurementsByOperation("COMPARE").size());
+		logger.info("LengthUnit operations: " +
+				app.repository.getMeasurementsByType("LengthUnit").size());
+		logger.info("Pool stats: " + app.repository.getPoolStatistics());
+		Server webServer = Server.createWebServer("-webPort", "8082", "-tcpAllowOthers").start();
+		logger.info("H2 Web Console available at: " + webServer.getURL());
 
-		System.out.println("2 FEET / 12 INCHES : " +
-				controller.performDivision(q1, q2));
+		// --- Cleanup (comment out to retain data across runs) ---
+		app.deleteAllMeasurements();
+		logger.info("After deleteAll, count: " + app.repository.getTotalCount());
 
-
-		System.out.println("---------------------------------------------");
-		System.out.println("Repository: "
-				+ app.repository.getAllMeasurements().size()
-				+ " operation(s) recorded.");
-		System.out.println("---------------------------------------------");
+		app.closeResources();
+		logger.info("============================================================");
 	}
 }

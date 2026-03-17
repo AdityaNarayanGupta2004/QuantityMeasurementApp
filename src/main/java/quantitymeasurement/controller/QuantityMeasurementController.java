@@ -6,12 +6,16 @@ import quantitymeasurement.repository.QuantityMeasurementCacheRepository;
 import quantitymeasurement.service.IQuantityMeasurementService;
 import quantitymeasurement.service.QuantityMeasurementServiceImpl;
 
+import java.util.logging.Logger;
 public class QuantityMeasurementController {
+    private static final Logger logger = Logger.getLogger(
+            QuantityMeasurementController.class.getName());
 
     private IQuantityMeasurementService quantityMeasurementService;
 
     public QuantityMeasurementController(IQuantityMeasurementService quantityMeasurementService) {
         this.quantityMeasurementService = quantityMeasurementService;
+        logger.info("QuantityMeasurementController initialized.");
     }
 
     // Comparison
@@ -49,16 +53,6 @@ public class QuantityMeasurementController {
 
     // Main method for quick testing
     public static void main(String[] args) {
-        IQuantityMeasurementRepository repo = QuantityMeasurementCacheRepository.getInstance();
-        QuantityMeasurementController controller = new QuantityMeasurementController(
-                new QuantityMeasurementServiceImpl(repo)
-        );
-
-        boolean result = controller.performComparison(
-                new QuantityDTO(1.0, QuantityDTO.LengthUnit.FEET),
-                new QuantityDTO(12.0, QuantityDTO.LengthUnit.INCHES)
-        );
-
-        System.out.println("1 FEET == 12 INCHES: " + result);
+        System.out.println("QuantityMeasurementControllerUC-16");
     }
 }
