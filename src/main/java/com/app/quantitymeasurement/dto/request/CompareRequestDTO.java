@@ -1,10 +1,15 @@
 package com.app.quantitymeasurement.dto.request;
 
 import com.app.quantitymeasurement.entity.QuantityDTO;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 public class CompareRequestDTO {
 
+    @Valid @NotNull(message = "thisQuantity must not be null")
     private QuantityDTO thisQuantity;
+
+    @Valid @NotNull(message = "thatQuantity must not be null")
     private QuantityDTO thatQuantity;
 
     public CompareRequestDTO() {}
@@ -15,9 +20,7 @@ public class CompareRequestDTO {
     }
 
     public QuantityDTO getThisQuantity() { return thisQuantity; }
-    public void setThisQuantity(QuantityDTO thisQuantity) { this.thisQuantity = thisQuantity; }
-
+    public void setThisQuantity(QuantityDTO v) { this.thisQuantity = v; }
     public QuantityDTO getThatQuantity() { return thatQuantity; }
-    public void setThatQuantity(QuantityDTO thatQuantity) { this.thatQuantity = thatQuantity;
-    }
+    public void setThatQuantity(QuantityDTO v) { this.thatQuantity = v; }
 }

@@ -1,31 +1,31 @@
 package com.app.quantitymeasurement.dto.request;
 
 import com.app.quantitymeasurement.entity.QuantityDTO;
-import lombok.Getter;
-import lombok.Setter;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 public class ArithmeticRequestDTO {
 
-    @Setter
+    @Valid @NotNull(message = "thisQuantity must not be null")
     private QuantityDTO thisQuantity;
-    @Getter
+
+    @Valid @NotNull(message = "thatQuantity must not be null")
     private QuantityDTO thatQuantity;
+
     private String targetUnit;
 
     public ArithmeticRequestDTO() {}
 
-    public ArithmeticRequestDTO(QuantityDTO thisQuantity,
-                                QuantityDTO thatQuantity,
-                                String targetUnit) {
+    public ArithmeticRequestDTO(QuantityDTO thisQuantity, QuantityDTO thatQuantity, String targetUnit) {
         this.thisQuantity = thisQuantity;
         this.thatQuantity = thatQuantity;
         this.targetUnit   = targetUnit;
     }
 
     public QuantityDTO getThisQuantity() { return thisQuantity; }
-
-    public void setThatQuantity(QuantityDTO thatQuantity) { this.thatQuantity = thatQuantity; }
-
+    public void setThisQuantity(QuantityDTO v) { this.thisQuantity = v; }
+    public QuantityDTO getThatQuantity() { return thatQuantity; }
+    public void setThatQuantity(QuantityDTO v) { this.thatQuantity = v; }
     public String getTargetUnit() { return targetUnit; }
-    public void setTargetUnit(String targetUnit) { this.targetUnit = targetUnit; }
+    public void setTargetUnit(String v) { this.targetUnit = v; }
 }

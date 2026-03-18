@@ -4,19 +4,27 @@ import jakarta.persistence.*;
 import lombok.Setter;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "quantity_measurements")
+@Table(
+    name = "quantity_measurements",
+    indexes = {
+        @Index(name = "idx_operation",        columnList = "operation"),
+        @Index(name = "idx_measurement_type", columnList = "thisMeasurementType"),
+        @Index(name = "idx_created_at",       columnList = "createdAt"),
+        @Index(name = "idx_is_error",         columnList = "isError")
+    }
+)
 public class QuantityMeasurementEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // Primary key for H2
+    private Long id;
 
-    // Inputs
     private double thisValue;
     private String thisUnit;
     private String thisMeasurementType;
@@ -27,110 +35,95 @@ public class QuantityMeasurementEntity implements Serializable {
 
     private String operation;
 
-    // Result
     private double resultValue;
     private String resultUnit;
+
     @Setter
     private String resultMeasurementType;
     private String resultString;
 
     private boolean isError;
-    private String errorMessage;
+    private String  errorMessage;
 
-    // ── Constructors ────────────────────────────────────────────────────────
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    public QuantityMeasurementEntity() {
-        // Required for JPA
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
     }
 
-    // For comparison results (e.g., "Equal" / "Not Equal")
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+
+    public QuantityMeasurementEntity() {}
+
     public QuantityMeasurementEntity(double thisValue, String thisUnit, String thisMeasurementType,
                                      double thatValue, String thatUnit, String thatMeasurementType,
                                      String operation, String resultString) {
-        this.thisValue = thisValue;
-        this.thisUnit = thisUnit;
+        this.thisValue = thisValue; this.thisUnit = thisUnit;
         this.thisMeasurementType = thisMeasurementType;
-        this.thatValue = thatValue;
-        this.thatUnit = thatUnit;
+        this.thatValue = thatValue; this.thatUnit = thatUnit;
         this.thatMeasurementType = thatMeasurementType;
-        this.operation = operation;
-        this.resultString = resultString;
+        this.operation = operation; this.resultString = resultString;
     }
 
-    // For numeric result
     public QuantityMeasurementEntity(double thisValue, String thisUnit, String thisMeasurementType,
                                      double thatValue, String thatUnit, String thatMeasurementType,
-                                     String operation, double resultValue, String resultUnit, String resultMeasurementType) {
-        this.thisValue = thisValue;
-        this.thisUnit = thisUnit;
+                                     String operation, double resultValue, String resultUnit,
+                                     String resultMeasurementType) {
+        this.thisValue = thisValue; this.thisUnit = thisUnit;
         this.thisMeasurementType = thisMeasurementType;
-        this.thatValue = thatValue;
-        this.thatUnit = thatUnit;
+        this.thatValue = thatValue; this.thatUnit = thatUnit;
         this.thatMeasurementType = thatMeasurementType;
-        this.operation = operation;
-        this.resultValue = resultValue;
-        this.resultUnit = resultUnit;
-        this.resultMeasurementType = resultMeasurementType;
+        this.operation = operation; this.resultValue = resultValue;
+        this.resultUnit = resultUnit; this.resultMeasurementType = resultMeasurementType;
     }
 
-    // For error
     public QuantityMeasurementEntity(double thisValue, String thisUnit, String thisMeasurementType,
                                      double thatValue, String thatUnit, String thatMeasurementType,
                                      String operation, String errorMessage, boolean isError) {
-        this.thisValue = thisValue;
-        this.thisUnit = thisUnit;
+        this.thisValue = thisValue; this.thisUnit = thisUnit;
         this.thisMeasurementType = thisMeasurementType;
-        this.thatValue = thatValue;
-        this.thatUnit = thatUnit;
+        this.thatValue = thatValue; this.thatUnit = thatUnit;
         this.thatMeasurementType = thatMeasurementType;
-        this.operation = operation;
-        this.errorMessage = errorMessage;
-        this.isError = isError;
+        this.operation = operation; this.errorMessage = errorMessage; this.isError = isError;
     }
 
-    // ── Getters & Setters ───────────────────────────────────────────────────
-
-    public Long getId() { return id; }
-
-    public double getThisValue() { return thisValue; }
-    public void setThisValue(double thisValue) { this.thisValue = thisValue; }
-
-    public String getThisUnit() { return thisUnit; }
-    public void setThisUnit(String thisUnit) { this.thisUnit = thisUnit; }
-
-    public String getThisMeasurementType() { return thisMeasurementType; }
-    public void setThisMeasurementType(String thisMeasurementType) { this.thisMeasurementType = thisMeasurementType; }
-
-    public double getThatValue() { return thatValue; }
-    public void setThatValue(double thatValue) { this.thatValue = thatValue; }
-
-    public String getThatUnit() { return thatUnit; }
-    public void setThatUnit(String thatUnit) { this.thatUnit = thatUnit; }
-
-    public String getThatMeasurementType() { return thatMeasurementType; }
-    public void setThatMeasurementType(String thatMeasurementType) { this.thatMeasurementType = thatMeasurementType; }
-
-    public String getOperation() { return operation; }
-    public void setOperation(String operation) { this.operation = operation; }
-
-    public double getResultValue() { return resultValue; }
-    public void setResultValue(double resultValue) { this.resultValue = resultValue; }
-
-    public String getResultUnit() { return resultUnit; }
-    public void setResultUnit(String resultUnit) { this.resultUnit = resultUnit; }
-
-    public String getResultMeasurementType() { return resultMeasurementType; }
-
-    public String getResultString() { return resultString; }
-    public void setResultString(String resultString) { this.resultString = resultString; }
-
-    public boolean isError() { return isError; }
-    public void setError(boolean error) { isError = error; }
-
-    public String getErrorMessage() { return errorMessage; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
-
-    // ── Overrides ──────────────────────────────────────────────────────────
+    public Long getId()                           { return id; }
+    public double getThisValue()                  { return thisValue; }
+    public void setThisValue(double v)            { this.thisValue = v; }
+    public String getThisUnit()                   { return thisUnit; }
+    public void setThisUnit(String v)             { this.thisUnit = v; }
+    public String getThisMeasurementType()        { return thisMeasurementType; }
+    public void setThisMeasurementType(String v)  { this.thisMeasurementType = v; }
+    public double getThatValue()                  { return thatValue; }
+    public void setThatValue(double v)            { this.thatValue = v; }
+    public String getThatUnit()                   { return thatUnit; }
+    public void setThatUnit(String v)             { this.thatUnit = v; }
+    public String getThatMeasurementType()        { return thatMeasurementType; }
+    public void setThatMeasurementType(String v)  { this.thatMeasurementType = v; }
+    public String getOperation()                  { return operation; }
+    public void setOperation(String v)            { this.operation = v; }
+    public double getResultValue()                { return resultValue; }
+    public void setResultValue(double v)          { this.resultValue = v; }
+    public String getResultUnit()                 { return resultUnit; }
+    public void setResultUnit(String v)           { this.resultUnit = v; }
+    public String getResultMeasurementType()      { return resultMeasurementType; }
+    public String getResultString()               { return resultString; }
+    public void setResultString(String v)         { this.resultString = v; }
+    public boolean isError()                      { return isError; }
+    public void setError(boolean v)               { this.isError = v; }
+    public String getErrorMessage()               { return errorMessage; }
+    public void setErrorMessage(String v)         { this.errorMessage = v; }
+    public LocalDateTime getCreatedAt()           { return createdAt; }
+    public LocalDateTime getUpdatedAt()           { return updatedAt; }
 
     @Override
     public boolean equals(Object obj) {
@@ -159,14 +152,12 @@ public class QuantityMeasurementEntity implements Serializable {
 
     @Override
     public String toString() {
-        if (isError) {
+        if (isError)
             return String.format("[%s] %.1f %s + %.1f %s | ERROR: %s",
                     operation, thisValue, thisUnit, thatValue, thatUnit, errorMessage);
-        }
-        if (resultString != null) {
+        if (resultString != null)
             return String.format("[%s] %.1f %s == %.1f %s | Result: %s",
                     operation, thisValue, thisUnit, thatValue, thatUnit, resultString);
-        }
         return String.format("[%s] %.1f %s + %.1f %s | Result: %.2f %s",
                 operation, thisValue, thisUnit, thatValue, thatUnit, resultValue, resultUnit);
     }
