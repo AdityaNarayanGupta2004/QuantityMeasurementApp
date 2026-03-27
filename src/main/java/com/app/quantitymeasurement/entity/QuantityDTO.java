@@ -13,14 +13,22 @@ public class QuantityDTO {
 
     public enum LengthUnit implements IMeasurableUnit {
         FEET, INCHES, YARDS, CENTIMETERS;
-        public String getUnitName()        { return this.name(); }
-        public String getMeasurementType() { return this.getClass().getSimpleName(); }
+        public String getUnitName()        {
+            return this.name();
+        }
+        public String getMeasurementType() {
+            return this.getClass().getSimpleName();
+        }
     }
 
     public enum VolumeUnit implements IMeasurableUnit {
         LITRE, MILLILITRE, GALLON;
-        public String getUnitName()        { return this.name(); }
-        public String getMeasurementType() { return this.getClass().getSimpleName(); }
+        public String getUnitName()        {
+            return this.name();
+        }
+        public String getMeasurementType() {
+            return this.getClass().getSimpleName();
+        }
     }
 
     public enum WeightUnit implements IMeasurableUnit {

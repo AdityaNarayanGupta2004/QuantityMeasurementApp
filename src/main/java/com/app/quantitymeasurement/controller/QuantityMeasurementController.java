@@ -18,9 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * UC17 - REST Controller.
- *
- * Changes from UC16:
+ * REST Controller.
  *   - @RestController + @RequestMapping expose HTTP endpoints
  *   - @Valid on every @RequestBody triggers Bean Validation automatically
  *   - All endpoints return QuantityMeasurementDTO (structured response)
