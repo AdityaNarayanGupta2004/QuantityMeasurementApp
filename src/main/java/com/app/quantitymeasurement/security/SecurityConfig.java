@@ -31,6 +31,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/auth/**",
+                                "/h2-console/**",   // ← YE ADD KARO
+                                "/actuator/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/api-docs/**"
