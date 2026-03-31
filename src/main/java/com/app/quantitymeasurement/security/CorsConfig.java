@@ -1,5 +1,6 @@
 package com.app.quantitymeasurement.security;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -28,13 +29,17 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CorsConfig {
 
+
+    @Value("${frontend_url}")
+    private String allowedOrigin;
+
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
         // Allows requests from file:// (direct open) and any localhost port
         config.addAllowedOriginPattern("*"); // for html, css, js
-        config.addAllowedOrigin("http://localhost:3000");  // React ka port
+        config.addAllowedOrigin(allowedOrigin);  // React ka port
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
